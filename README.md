@@ -1,1 +1,3 @@
 Lots of demos to come...
+
+- Copilot demo
