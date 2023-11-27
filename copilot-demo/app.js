@@ -5,19 +5,32 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
 
 db.serialize(() => {
-    db.run('CREATE TABLE emails (email TEXT)');
+    db.run('CREATE TABLE IF NOT EXISTS emails (email TEXT)');
 });
 
 const app = express();
 app.use(bodyParser.json());
 
 app.post('/api/email', (req, res) => {
-    db.run('INSERT INTO emails VALUES (?)', req.body.email, (err) => {
+    const email = req.body.email;
+
+    if (!email) {
+        return res.status(400).send('Email is required');
+    }
+
+    //validate email for right format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send('Email is invalid');
+    }
+
+    db.run('INSERT INTO emails VALUES (?)', email, (err) => {
         if (err) {
-            res.status(500).send(err);
-        } else {
-            res.status(200).send('Email saved successfully!');
+            console.error('Error saving email:', err);
+            return res.status(500).send('An error occurred while saving the email');
         }
+
+        res.status(200).send('Email saved successfully!');
     });
 });
 
