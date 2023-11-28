@@ -26,16 +26,6 @@ db.run('CREATE TABLE emails (email TEXT)', (err) => {
 app.post('/email', (req, res) => {
     const { email } = req.body;
 
-    // validate if email is in proper format
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).send('Email is not in proper format');
-    }
-
-    if (!email) {
-        return res.status(400).send('Email is required');
-    }
-
     const stmt = db.prepare('INSERT INTO emails(email) VALUES(?)');
     stmt.run(email, (err) => {
         if (err) {
