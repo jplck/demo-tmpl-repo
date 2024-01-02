@@ -1,0 +1,15 @@
+POST http://localhost:3000/email HTTP/1.1
+content-type: application/json
+
+{
+    "email": "sample@example.de"
+}
+
+### Bad Request
+
+POST http://localhost:3000/email HTTP/1.1
+content-type: application/json
+
+{
+    "email": "sample@example"
+}
