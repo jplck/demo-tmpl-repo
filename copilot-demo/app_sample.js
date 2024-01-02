@@ -1,42 +1,39 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const bodyParser = require('body-parser');
+
 const app = express();
-const port = 8080;
+const db = new sqlite3.Database(':memory:');
 
-// Enable body parsing for JSON
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Initialize SQLite database
-let db = new sqlite3.Database(':memory:', (err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-  console.log('Connected to the in-memory SQlite database.');
+db.serialize(() => {
+    db.run('CREATE TABLE emails (email TEXT)');
 });
-
-// Create table to store emails
-db.run('CREATE TABLE emails (email TEXT)', (err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-});
-
-// API endpoint to store email
 
 app.post('/email', (req, res) => {
     const { email } = req.body;
 
-    const stmt = db.prepare('INSERT INTO emails(email) VALUES(?)');
-    stmt.run(email, (err) => {
+    // Email validation regular expression
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    db.run(`INSERT INTO emails(email) VALUES(?)`, email, function(err) {
         if (err) {
-            return res.status(500).send(err.message);
+            console.error('Error inserting email:', err);
+            return res.status(500).json({ error: 'Failed to save email' });
         }
-        res.send('Email saved successfully');
+        return res.json({ message: 'Email saved successfully' });
     });
 });
 
-app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`);
-});
+app.listen(3000, () => console.log('App is running on http://localhost:3000'));
 
 module.exports = app;
