@@ -13,3 +13,7 @@ content-type: application/json
 {
     "email": "sample@example"
 }
+
+### Get
+
+GET http://localhost:3000/email HTTP/1.1
