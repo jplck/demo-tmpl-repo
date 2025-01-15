@@ -14,18 +14,7 @@ db.serialize(() => {
 app.post('/email', (req, res) => {
     const { email } = req.body;
 
-    // Email validation regular expression
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
-    }
-
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    db.run(`INSERT INTO emails(email) VALUES(?)`, email, function(err) {
+    db.run(`INSERT INTO emails(email) VALUES(?)`, function(err) {
         if (err) {
             console.error('Error inserting email:', err);
             return res.status(500).json({ error: 'Failed to save email' });
